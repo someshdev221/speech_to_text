@@ -1,0 +1,9 @@
+{
+    "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "AzureWebJobsStorageConnectionStringValue",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "AzureSpeechSubscriptionKey": "AQWWURDSYxS7uw4WkpYHMWVtELMkxfWUASAQ1sFDsqP4rT53Oz8ZJQQJ99ALACGhslBXJ3w3AAAYACOGdPxY",
+    "AzureSpeechRegion": "centralindia"
+  }
+}
