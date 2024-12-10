@@ -7,8 +7,8 @@ pool:
   vmImage: 'ubuntu-latest'  # Using Ubuntu as the agent image
 
 variables:
-  azureSubscription: 'YourAzureSubscriptionName'  # Azure Subscription linked in Azure DevOps
-  appName: 'webapptest00'  # Name of the Azure Web App
+  azureSubscription: 'YourAzureSubscriptionName'  # Azure Subscription linked in Azure DevOps (Service Connection Name)
+  appName: 'webapptest00'  # Name of the Azure Web App (replace with your app name)
   resourceGroup: 'YourResourceGroup'  # Resource Group name for your Azure Web App
 
 jobs:
@@ -16,27 +16,32 @@ jobs:
     displayName: 'Build and Deploy .NET Core to Azure'
     steps:
 
-      - task: Checkout@2  # Checkout the code from the repository
+      # Step 1: Checkout the code from the repository
+      - task: Checkout@1  # Fixed the version number to '1'
         displayName: 'Checkout Code'
 
+      # Step 2: Install .NET SDK
       - task: UseDotNet@2
         inputs:
           packageType: 'sdk'
           version: '8.x'  # Specify the .NET version
         displayName: 'Install .NET SDK'
 
+      # Step 3: Restore dependencies
       - task: DotNetCoreCLI@2
         inputs:
           command: 'restore'  # Restore dependencies
           projects: '**/*.csproj'  # Path to your .csproj files
         displayName: 'Restore dependencies'
 
+      # Step 4: Build the app
       - task: DotNetCoreCLI@2
         inputs:
           command: 'build'  # Build the app
           projects: '**/*.csproj'  # Path to your .csproj files
         displayName: 'Build the project'
 
+      # Step 5: Publish the project
       - task: DotNetCoreCLI@2
         inputs:
           command: 'publish'  # Publish the app
@@ -44,6 +49,7 @@ jobs:
           arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/publish'
         displayName: 'Publish the project'
 
+      # Step 6: Publish build artifacts
       - task: PublishBuildArtifacts@1
         inputs:
           pathToPublish: '$(Build.ArtifactStagingDirectory)/publish'
@@ -55,14 +61,17 @@ jobs:
     dependsOn: BuildAndDeploy  # Ensure deploy job runs after the build
     condition: succeeded()
     steps:
+
+      # Step 7: Download build artifacts
       - task: DownloadBuildArtifacts@0
         inputs:
-          artifactName: 'drop'
+          artifactName: 'drop'  # Artifact name defined in the previous job
         displayName: 'Download Artifact'
 
+      # Step 8: Deploy to Azure Web App
       - task: AzureWebApp@1
         inputs:
-          azureSubscription: $(azureSubscription)  # Azure Subscription name
-          appName: $(appName)  # Azure Web App name
-          package: $(Build.ArtifactStagingDirectory)/publish  # Path to the published app
+          azureSubscription: $(azureSubscription)  # Azure Subscription linked in Azure DevOps (Service Connection Name)
+          appName: $(appName)  # Azure Web App name (e.g., webapptest00)
+          package: $(Build.ArtifactStagingDirectory)/publish  # Path to the published app (downloaded artifact)
         displayName: 'Deploy to Azure Web App'
