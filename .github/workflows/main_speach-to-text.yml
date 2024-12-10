@@ -1,52 +1,41 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy dotnet core app to Azure Function App - speach-to-text
+name: .NET Core 8 Build and Deploy
 
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
-
-env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '8.0.x' # set this to the dotnet version to use
+      - main  # Adjust branch if necessary
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
-    permissions:
-      id-token: write #This is required for requesting the JWT
+    runs-on: ubuntu-latest
 
     steps:
-      - name: 'Checkout GitHub Action'
-        uses: actions/checkout@v4
+    # Step 1: Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+    # Step 2: Setup .NET Core
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
 
-      - name: 'Resolve Project Dependencies Using Dotnet'
-        shell: pwsh
-        run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet build --configuration Release --output ./output
-          popd
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_433DFF3145BD4A428E43B6452DCF9750 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_252261FC8793476D8DC1BE7C484BF4E9 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9D3F9E0797F44E049CC692BA7B7E0248 }}
+    # Step 3: Restore dependencies
+    - name: Restore dependencies
+      run: dotnet restore
 
-      - name: 'Run Azure Functions Action'
-        uses: Azure/functions-action@v1
-        id: fa
-        with:
-          app-name: 'speach-to-text'
-          slot-name: 'Production'
-          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          
+    # Step 4: Build the application
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    # Step 5: Publish the application
+    - name: Publish
+      run: dotnet publish -c Release -o publish
+
+    # Step 6: Deploy to Azure App Service
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'speachtotext'  # Replace with your App Service name
+        slot-name: 'production'  # Replace with your deployment slot if any
+        publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
