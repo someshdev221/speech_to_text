@@ -36,5 +36,5 @@ jobs:
     - name: Deploy to Azure App Service
       uses: azure/webapps-deploy@v2
       with:
-        app-name: speachtotext # Replace with your App Service name
+        app-name: 'speachtotext' # Replace with your App Service name
         publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
