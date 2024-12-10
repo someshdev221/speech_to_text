@@ -1,0 +1,53 @@
+name: Build and deploy ASP.Net Core app to Azure Web App - webapptest00
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to the main branch
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4  # Checkout the code from your GitHub repository
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'  # Specify .NET version to use
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp  # Save the published files for deployment
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build  # Ensure deployment happens only after build is successful
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}  # Set the URL to be used in notifications
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app  # Download the build artifact
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3  # Use Azure's web app deploy action
+        with:
+          app-name: 'webapptest00'  # Replace with your actual Azure Web App name
+          slot-name: 'Production'  # Ensure deployment to the correct slot (e.g., 'Production')
+          package: .  # Path to the folder containing the published app
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E712337B61C74A12B4D347241E2FD62D }}  # Your Azure Publish Profile
