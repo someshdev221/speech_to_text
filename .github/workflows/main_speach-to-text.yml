@@ -3,7 +3,7 @@ name: .NET Core 8 Build and Deploy
 on:
   push:
     branches:
-      - main  # Adjust branch if necessary
+      - main  # Adjust this branch if necessary
 
 jobs:
   build-and-deploy:
@@ -18,7 +18,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '8.0.x' # .NET Core 8
 
     # Step 3: Restore dependencies
     - name: Restore dependencies
@@ -36,6 +36,5 @@ jobs:
     - name: Deploy to Azure App Service
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'speachtotext'  # Replace with your App Service name
-        slot-name: 'production'  # Replace with your deployment slot if any
+        app-name: speachtotext # Replace with your App Service name
         publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
