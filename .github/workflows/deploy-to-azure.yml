@@ -47,6 +47,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3 
         with:
-          app-name: 'web-auea-nprd-sit-tempus-01'  
-          package: . 
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}  
+          app-name: 'web-auea-nprd-sit-tempus-01'  # Updated Azure Web App name
+          slot-name: 'Production'  # Ensure deployment to the correct slot (e.g., 'Production')
+          package: .  # Path to the folder containing the published app
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_TEST123 }}  # Your Azure Publish Profile
